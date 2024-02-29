@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function playReadySound() {
-        const readySound = new Audio('./Sounds/Ready.mp3');
+        const readySound = new Audio('Sounds/Ready.mp3');
         readySound.play();
         readySound.onended = function() {
             updateStatus("Ready!");
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function playSound(sound) {
-        const audio = new Audio(`./Sounds/${sound}.mp3`);
+        const audio = new Audio(`Sounds/${sound}.mp3`);
         audio.play();
     }
 
