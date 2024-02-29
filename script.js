@@ -34,13 +34,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Countdown before session starts
-    function startCountdown(count) {
+function startCountdown(count) {
         updateStatus(`Starting in ${count}...`);
         let countdownInterval = setInterval(() => {
             count--;
             if (count <= 0) {
                 clearInterval(countdownInterval);
-                playReadySound();
+                updateStatus("Ready!");
+                // Instead of waiting for the 'Ready.mp3' to end, proceed after a fixed delay.
+                playReadySoundAndStartSession(); // Combined function to play sound and start session.
             } else {
                 updateStatus(`Starting in ${count}...`);
             }
@@ -48,13 +50,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Play "Ready" sound
-    function playReadySound() {
+    function playReadySoundAndStartSession() {
         const readySound = new Audio('Sounds/Ready.mp3');
-        readySound.play();
-        readySound.onended = function() {
-            updateStatus("Ready!");
-            setTimeout(startSession, 3000); // Wait for 3 seconds after "Ready" before starting
-        };
+        readySound.play().then(() => {
+            // Wait for 3 seconds after playing "Ready" sound, then start session.
+            setTimeout(startSession, 3000);
+        }).catch(error => {
+            console.error("Failed to play the 'Ready' sound:", error);
+            // If there's an error playing the sound, start the session immediately or after a delay.
+            setTimeout(startSession, 1000); // Adjust this delay as needed.
+        });
     }
 
     // Start the session
