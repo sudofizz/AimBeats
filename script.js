@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let difficulty = '';
     let score = 0;
 
-    // Setup round buttons
     document.querySelectorAll('.round-btn').forEach(button => {
         button.addEventListener('click', function() {
             rounds = this.dataset.rounds;
@@ -13,7 +12,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Setup difficulty buttons
     document.querySelectorAll('.difficulty-btn').forEach(button => {
         button.addEventListener('click', function() {
             difficulty = this.dataset.difficulty;
@@ -22,47 +20,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Start session button
     document.getElementById('start').addEventListener('click', function() {
         if (!rounds || !difficulty) {
             alert('Please select both a round count and difficulty level.');
             return;
         }
         resetScore();
-        updateStatus('Get ready...');
-        startCountdown(3);
+        // Directly initiate the first sound as part of the interaction
+        // to comply with mobile browsers' autoplay policies.
+        playReadySound();
     });
 
-    // Countdown before session starts
-function startCountdown(count) {
-        updateStatus(`Starting in ${count}...`);
-        let countdownInterval = setInterval(() => {
-            count--;
-            if (count <= 0) {
-                clearInterval(countdownInterval);
-                updateStatus("Ready!");
-                // Instead of waiting for the 'Ready.mp3' to end, proceed after a fixed delay.
-                playReadySoundAndStartSession(); // Combined function to play sound and start session.
-            } else {
-                updateStatus(`Starting in ${count}...`);
-            }
-        }, 1000);
-    }
-
-    // Play "Ready" sound
-    function playReadySoundAndStartSession() {
+    function playReadySound() {
         const readySound = new Audio('Sounds/Ready.mp3');
         readySound.play().then(() => {
-            // Wait for 3 seconds after playing "Ready" sound, then start session.
-            setTimeout(startSession, 3000);
+            updateStatus("Ready!");
+            setTimeout(() => {
+                startSession();
+            }, 3000); // Adjust as necessary for timing after "Ready"
         }).catch(error => {
-            console.error("Failed to play the 'Ready' sound:", error);
-            // If there's an error playing the sound, start the session immediately or after a delay.
-            setTimeout(startSession, 1000); // Adjust this delay as needed.
+            console.error("Error playing sound:", error);
+            // Fallback or user prompt to manually start the session could go here
         });
     }
 
-    // Start the session
     function startSession() {
         updateStatus('Session started...');
         let currentRound = 0;
@@ -70,9 +51,10 @@ function startCountdown(count) {
 
         const sessionInterval = setInterval(() => {
             if (currentRound < rounds) {
-                playSound(sounds[currentRound % sounds.length]);
+                // Ensures subsequent sounds also follow user interactions
+                if (currentRound > 0) playSound(sounds[currentRound % sounds.length]);
                 currentRound++;
-                updateScore(1); // Increment score, adjust as needed
+                updateScore(1); // This is a placeholder to increment score, adjust as needed
             } else {
                 clearInterval(sessionInterval);
                 updateStatus('Session Complete! Great job!');
@@ -80,13 +62,11 @@ function startCountdown(count) {
         }, intervalDuration);
     }
 
-    // Play a sound from the list
     function playSound(sound) {
         const audio = new Audio(`Sounds/${sound}.mp3`);
-        audio.play();
+        audio.play().catch(error => console.error("Error playing sound:", error));
     }
 
-    // Calculate interval between sounds based on difficulty
     function calculateInterval() {
         switch (difficulty) {
             case 'easy': return 3000;
@@ -96,19 +76,16 @@ function startCountdown(count) {
         }
     }
 
-    // Update the score display
     function updateScore(points) {
         score += points;
         document.getElementById('score').innerText = `Score: ${score}`;
     }
 
-    // Reset score to zero
     function resetScore() {
         score = 0;
-        updateScore(0); // Reset the score display
+        updateScore(0);
     }
 
-    // Update status message
     function updateStatus(message) {
         document.getElementById('status').textContent = message;
     }
