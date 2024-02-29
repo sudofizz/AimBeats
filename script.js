@@ -3,10 +3,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let rounds = 0;
     let difficulty = '';
     let score = 0;
+    let currentRound = 0;
 
     document.querySelectorAll('.round-btn').forEach(button => {
         button.addEventListener('click', function() {
-            rounds = this.dataset.rounds;
+            rounds = parseInt(this.dataset.rounds, 10);
             document.querySelectorAll('.round-btn').forEach(btn => btn.classList.remove('selected'));
             this.classList.add('selected');
         });
@@ -25,46 +26,30 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Please select both a round count and difficulty level.');
             return;
         }
+        this.disabled = true; // Disable the start button to prevent re-starts
         resetScore();
-        // Directly initiate the first sound as part of the interaction
-        // to comply with mobile browsers' autoplay policies.
-        playReadySound();
+        currentRound = 0;
+        updateStatus('Tap to start the session');
+        // Change the button text to prompt for next sound
+        this.textContent = 'Tap for Next Sound';
+        this.removeEventListener('click', arguments.callee);
+        this.addEventListener('click', playNextSound);
     });
 
-    function playReadySound() {
-        const readySound = new Audio('Sounds/Ready.mp3');
-        readySound.play().then(() => {
-            updateStatus("Ready!");
-            setTimeout(() => {
-                startSession();
-            }, 3000); // Adjust as necessary for timing after "Ready"
-        }).catch(error => {
-            console.error("Error playing sound:", error);
-            // Fallback or user prompt to manually start the session could go here
-        });
-    }
-
-    function startSession() {
-        updateStatus('Session started...');
-        let currentRound = 0;
-        const intervalDuration = calculateInterval();
-
-        const sessionInterval = setInterval(() => {
-            if (currentRound < rounds) {
-                // Ensures subsequent sounds also follow user interactions
-                if (currentRound > 0) playSound(sounds[currentRound % sounds.length]);
+    function playNextSound() {
+        if (currentRound < rounds) {
+            const soundIndex = currentRound % sounds.length;
+            const audio = new Audio(`Sounds/${sounds[soundIndex]}.mp3`);
+            audio.play().then(() => {
+                updateScore(1); // Increment score
                 currentRound++;
-                updateScore(1); // This is a placeholder to increment score, adjust as needed
-            } else {
-                clearInterval(sessionInterval);
-                updateStatus('Session Complete! Great job!');
-            }
-        }, intervalDuration);
-    }
-
-    function playSound(sound) {
-        const audio = new Audio(`Sounds/${sound}.mp3`);
-        audio.play().catch(error => console.error("Error playing sound:", error));
+                updateStatus(`Played ${sounds[soundIndex]}. Tap for next.`);
+            }).catch(error => console.error("Error playing sound:", error));
+        } else {
+            updateStatus('Session Complete! Great job!');
+            document.getElementById('start').disabled = false; // Re-enable the start button
+            document.getElementById('start').textContent = 'Start Session';
+        }
     }
 
     function calculateInterval() {
