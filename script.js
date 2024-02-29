@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let difficulty = '';
     let score = 0;
 
+    // Setup round buttons
     document.querySelectorAll('.round-btn').forEach(button => {
         button.addEventListener('click', function() {
             rounds = this.dataset.rounds;
@@ -12,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Setup difficulty buttons
     document.querySelectorAll('.difficulty-btn').forEach(button => {
         button.addEventListener('click', function() {
             difficulty = this.dataset.difficulty;
@@ -20,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Start session button
     document.getElementById('start').addEventListener('click', function() {
         if (!rounds || !difficulty) {
             alert('Please select both a round count and difficulty level.');
@@ -30,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
         startCountdown(3);
     });
 
+    // Countdown before session starts
     function startCountdown(count) {
         updateStatus(`Starting in ${count}...`);
         let countdownInterval = setInterval(() => {
@@ -43,6 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 1000);
     }
 
+    // Play "Ready" sound
     function playReadySound() {
         const readySound = new Audio('Sounds/Ready.mp3');
         readySound.play();
@@ -52,6 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
+    // Start the session
     function startSession() {
         updateStatus('Session started...');
         let currentRound = 0;
@@ -61,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (currentRound < rounds) {
                 playSound(sounds[currentRound % sounds.length]);
                 currentRound++;
-                updateScore(1); // This is a placeholder to increment score, adjust as needed
+                updateScore(1); // Increment score, adjust as needed
             } else {
                 clearInterval(sessionInterval);
                 updateStatus('Session Complete! Great job!');
@@ -69,35 +75,35 @@ document.addEventListener('DOMContentLoaded', function() {
         }, intervalDuration);
     }
 
+    // Play a sound from the list
     function playSound(sound) {
         const audio = new Audio(`Sounds/${sound}.mp3`);
         audio.play();
     }
 
+    // Calculate interval between sounds based on difficulty
     function calculateInterval() {
-        // Adjust the interval based on difficulty
         switch (difficulty) {
-            case 'easy':
-                return 3000;
-            case 'medium':
-                return 2000;
-            case 'hard':
-                return 1000;
-            default:
-                return 3000;
+            case 'easy': return 3000;
+            case 'medium': return 2000;
+            case 'hard': return 1000;
+            default: return 3000;
         }
     }
 
+    // Update the score display
     function updateScore(points) {
         score += points;
-        document.getElementById('score').innerText = `${score}`;
+        document.getElementById('score').innerText = `Score: ${score}`;
     }
 
+    // Reset score to zero
     function resetScore() {
         score = 0;
         updateScore(0); // Reset the score display
     }
 
+    // Update status message
     function updateStatus(message) {
         document.getElementById('status').textContent = message;
     }
